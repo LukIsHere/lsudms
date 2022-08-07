@@ -12,7 +12,8 @@ int main(){
         ums::cmd cmd = ums::cmd(in);
         string first =cmd.get(0);
         if(first=="start"){
-            cout << ums::stoi64("9038223974") << endl;
+            ums::user u = ums::user("{\"haj\":\"hi\"}");
+            cout << u.gets("haj") << endl;
         }
     }
     

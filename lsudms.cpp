@@ -200,13 +200,13 @@ int64_t ums::stoi64(string v){
             };
             //get values
             string ums::var::gstr(){
-                return string("hi");
+                return value;
             };
             int ums::var::gint(){
-                return 0;
+                return stoi(value);
             };
             bool ums::var::gbool(){
-                return true;
+                return (value=="true");
             };
             ums::list ums::var::getl(){
                 return list(value);
@@ -274,12 +274,34 @@ int64_t ums::stoi64(string v){
 
 
             //user - przechowuje wartość
+            //bool exist;
             //map<string,var> data;
             ums::user::user(){
-
+                exist = false;
             };
-            ums::user::user(string dt){
+            ums::user::user(string dt){//{"key":"val"}
                 //to-do
+                exist = true;
+                char l;
+                string key;
+                string val;
+                bool state = false;//true-val false-key
+                for(int i = 0;i<dt.length();i++){
+                    l = dt.at(i);
+                    if(l=='{'||l=='}'){}
+                    else if(l==':') state = true;
+                    else if(l=='"'){}
+                    else if(l==','){
+                        state = false;
+                        data[key] = val;
+                        key = "";
+                        val = "";
+                    }else{
+                        if(state)val+=l;
+                        else key+=l;
+                    }
+                }
+                data[key] = val;
             };
             //set values
             void ums::user::set(string name,string val){
@@ -327,7 +349,24 @@ int64_t ums::stoi64(string v){
                 return data[name].getl();
             };
             string ums::user::getS(){
-                return string("");//{"val":"key"} //to-do
+                string out = "{";
+                bool first = true;
+                map<string,var>::iterator it;
+                for(it = data.begin();it==data.end();it++){
+                    if(!first){
+                        out+=',';
+                    }
+                    first = false;
+                    out += '"';
+                    out.append(it->first);
+                    out += '"';
+                    out += ':';
+                    out += '"';
+                    out.append(it->second.gstr());
+                    out += '"';
+                }
+                out+='}';
+                return out;//{"val":"key"}
             }
 
 
@@ -336,18 +375,83 @@ int64_t ums::stoi64(string v){
             //string name;
             //map<int64_t,user> data;
             ums::db::db(){
-                name = "";
+                
             };
-            ums::db::db(string n){
+            ums::db::db(string n,string loc){
+                fopen = false;
                 name = n;
+                location = loc;
             };
             // save/load data from files
             // id:{"key":"value","key2":"value2"}
-            void ums::db::save(string loc){
+            void ums::db::save(){
+                string loc = location;
+                map<int64_t,user> *m = &data;
+                bool *open = &fopen;
+                thread save([&loc,open,m](){
+                    while(*open){};
+                    *open = true;
+                    ofstream of;
+                    of.open(loc);
+                    map<int64_t,user>::iterator it;
+                    for(it = m->begin();it==m->end();it++){
+                        of << to_string(it->first) << ":" << it->second.getS() << endl;
+                    };
+                    of.close();
+                    *open = false;
+                });
+                save.detach();
                 //to-do
             };
-            void ums::db::load(string loc){
+            void ums::db::load(){
+                    string loc = location;
+                    bool *open = &fopen;
+                    map<int64_t,user> *m = &data;
+                    thread load([&loc,open,m](){
+                        while(*open){}
+                        ifstream of;
+                        *open = true;
+                        of.open(loc);
+                        string decode;
+                        while (getline(of,decode))
+                        {
+                            string id;
+                            bool readingData = false;
+                            string data;
+                            char l;
+                            for(int i = 0;i<decode.length();i++){
+                                l = decode.at(i);
+                                if(l==':'&&!readingData){
+                                    readingData = true;
+                                }else if(readingData){
+                                    data+=l;
+                                }else{
+                                    id+=l;
+                                }
+                            }
+                            int idd = stoi64(id);
+                            m->insert(pair<int64_t,user>(idd,user(data)));
+                        }
+                        of.close();
+                        *open = false;
+                    });
+                    load.detach();
+                
                 //to-do
+            };
+            void ums::db::backup(string name){
+                string loc = name;
+                map<int64_t,user> *m = &data;
+                thread save([&loc,m](){
+                    ofstream of;
+                    of.open(loc);
+                    map<int64_t,user>::iterator it;
+                    for(it = m->begin();it==m->end();it++){
+                        of << to_string(it->first) << ":" << it->second.getS() << endl;
+                    };
+                    of.close();
+                });
+                save.detach();
             };
             //get user pointer
             ums::user * ums::db::get(int64_t id){
@@ -388,4 +492,21 @@ int64_t ums::stoi64(string v){
                             place++;
                         }
                 return finded;
+            };
+
+
+
+            //settings
+            //map<std::string,std::string> data;
+            ums::settings::settings(string loc){
+
+            };
+            string ums::settings::getS(string name){
+                return name;
+            };
+            int ums::settings::getI(string name){
+                return 0;
+            };
+            bool ums::settings::getB(string name){
+                return true;
             };

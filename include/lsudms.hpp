@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <functional>
+#include <thread>
 //function<zwrot(argumenty)> func
 namespace ums{
     void connect();
@@ -52,6 +53,7 @@ namespace ums{
     };
     class user{
         public:
+            bool exist;
             std::map<std::string,var> data;
             user();
             user(std::string dt);
@@ -77,13 +79,16 @@ namespace ums{
     class db{
         public:
             std::string name;
+            std::string location;
+            bool fopen;
             std::map<int64_t,user> data;
             db();
-            db(std::string name);
+            db(std::string n,std::string loc);
             // save/load data from files
             // id:{"key":"value","key2":"value2"}
-            void save(std::string loc);
-            void load(std::string loc);
+            void save();
+            void load();
+            void backup(std::string name);
             //get user pointer
             user *get(int64_t id);
     };
@@ -94,5 +99,14 @@ namespace ums{
             cmd();
             cmd(std::string value);
             std::string get(int p);
+    };
+
+    class settings{
+        public:
+            std::map<std::string,std::string> data;
+            settings(std::string loc);
+            std::string getS(std::string name);
+            int getI(std::string name);
+            bool getB(std::string name);
     };
 }
