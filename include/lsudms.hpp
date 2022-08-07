@@ -17,11 +17,14 @@ namespace ums{
             void remove(std::string v);
             bool include(std::string v);
             void forEach(std::function<void(std::string v)> fun);
+            std::string get(int p);
+            int size();
             //export
             std::string getS();
     };
     class var{
         public:
+            bool exist;
             std::string value;
             var();
             var(std::string v);
@@ -44,7 +47,7 @@ namespace ums{
             //set values
             void set(std::string v);
             void set(int v);
-            void set(bool);
+            void set(bool v);
             void set(list v);
     };
     class user{
@@ -69,6 +72,7 @@ namespace ums{
             int geti(std::string name);
             bool getb(std::string name);
             list getl(std::string name);
+            std::string getS();
     };
     class db{
         public:

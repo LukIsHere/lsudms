@@ -6,6 +6,7 @@
         "utility": "cpp",
         "istream": "cpp",
         "tuple": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "string": "cpp"
     }
 }
