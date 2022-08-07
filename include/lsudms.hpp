@@ -83,6 +83,7 @@ namespace ums{
             bool fopen;
             std::map<int64_t,user> data;
             db();
+            db(std::string data);
             db(std::string n,std::string loc);
             // save/load data from files
             // id:{"key":"value","key2":"value2"}

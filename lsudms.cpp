@@ -280,7 +280,7 @@ int64_t ums::stoi64(string v){
                 exist = false;
             };
             ums::user::user(string dt){//{"key":"val"}
-                //to-do
+                //to-do fix list reading
                 exist = true;
                 char l;
                 string key;
@@ -352,7 +352,7 @@ int64_t ums::stoi64(string v){
                 string out = "{";
                 bool first = true;
                 map<string,var>::iterator it;
-                for(it = data.begin();it==data.end();it++){
+                for(it = data.begin();it!=data.end();it++){
                     if(!first){
                         out+=',';
                     }
@@ -394,7 +394,7 @@ int64_t ums::stoi64(string v){
                     ofstream of;
                     of.open(loc);
                     map<int64_t,user>::iterator it;
-                    for(it = m->begin();it==m->end();it++){
+                    for(it = m->begin();it!=m->end();it++){
                         of << to_string(it->first) << ":" << it->second.getS() << endl;
                     };
                     of.close();
@@ -446,7 +446,7 @@ int64_t ums::stoi64(string v){
                     ofstream of;
                     of.open(loc);
                     map<int64_t,user>::iterator it;
-                    for(it = m->begin();it==m->end();it++){
+                    for(it = m->begin();it!=m->end();it++){
                         of << to_string(it->first) << ":" << it->second.getS() << endl;
                     };
                     of.close();
@@ -476,7 +476,7 @@ int64_t ums::stoi64(string v){
                 for(int i = 0; v.length()>i;i++){
                     if(v.at(i)==' '){
                         if(p==place){
-                            finded = out;
+                            return out;
                             place++;
                         }
                         else{
@@ -488,10 +488,9 @@ int64_t ums::stoi64(string v){
                     }
                 }
                 if(p==place){
-                            finded = out;
-                            place++;
-                        }
-                return finded;
+                    return out;
+                }
+                return "";
             };
 
 

@@ -15,6 +15,11 @@ int main(){
             ums::user u = ums::user("{\"haj\":\"hi\"}");
             cout << u.gets("haj") << endl;
         }
+        if(first=="usrTST"){
+            
+            ums::user u = ums::user("{\"haj\":\"hi\"}");
+            cout << u.getS() << endl;
+        }
     }
     
 }
