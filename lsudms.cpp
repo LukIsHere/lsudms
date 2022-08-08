@@ -280,18 +280,19 @@ int64_t ums::stoi64(string v){
                 exist = false;
             };
             ums::user::user(string dt){//{"key":"val"}
-                //to-do fix list reading
+                
                 exist = true;
                 char l;
                 string key;
                 string val;
+                bool read = false;
                 bool state = false;//true-val false-key
                 for(int i = 0;i<dt.length();i++){
                     l = dt.at(i);
                     if(l=='{'||l=='}'){}
                     else if(l==':') state = true;
-                    else if(l=='"'){}
-                    else if(l==','){
+                    else if(l=='"'){read = !read;}
+                    else if(l==','&&!read){
                         state = false;
                         data[key] = val;
                         key = "";
@@ -401,7 +402,6 @@ int64_t ums::stoi64(string v){
                     *open = false;
                 });
                 save.detach();
-                //to-do
             };
             void ums::db::load(){
                     string loc = location;
@@ -436,8 +436,6 @@ int64_t ums::stoi64(string v){
                         *open = false;
                     });
                     load.detach();
-                
-                //to-do
             };
             void ums::db::backup(string name){
                 string loc = name;
@@ -469,6 +467,7 @@ int64_t ums::stoi64(string v){
                 v = value;
             };
             string ums::cmd::get(int p){
+                //to-do fix
                 int place = 0;
                 string out = "";
                 string finded;
