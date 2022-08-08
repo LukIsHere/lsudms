@@ -76,6 +76,20 @@ namespace ums{
             list getl(std::string name);
             std::string getS();
     };
+    class score{
+        public:
+            int scor = 0;
+            std::string name = "";
+            score();
+            score(int s,std::string n);
+    };
+    class top{
+        public:
+            score s[25];
+            top(score t);
+            void addS(score w);
+            std::string out();
+    };
     class db{
         public:
             std::string name;
@@ -85,13 +99,19 @@ namespace ums{
             db();
             db(std::string data);
             db(std::string n,std::string loc);
+            void addU(int64_t id,user u);
+            void addU(std::string usr);
+            void delU(int64_t id);
             // save/load data from files
             // id:{"key":"value","key2":"value2"}
             void save();
             void load();
             void backup(std::string name);
+            void log();
             //get user pointer
             user *get(int64_t id);
+            //top
+            top topBy(std::string name);
     };
     
     class cmd{
@@ -110,4 +130,5 @@ namespace ums{
             int getI(std::string name);
             bool getB(std::string name);
     };
+    
 }

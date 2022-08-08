@@ -1,6 +1,7 @@
 #include "lsudms.hpp"
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 using namespace  std;
 //sprawdza czy biblioteka działa poprawnie
 void ums::connect(){
@@ -93,9 +94,9 @@ int64_t ums::stoi64(string v){
                     if (anal.at(i) == ',')
                     {
 
-                        if (cur == value)
+                        if (cur == v)
                         {
-                            out = true;
+                            return true;
                         }
 
                         cur = "";
@@ -105,11 +106,11 @@ int64_t ums::stoi64(string v){
                         cur += anal.at(i);
                     }
                 }
-                if (cur == value)
+                if (cur == v)
                 {
-                    out = true;
+                    return true;
                 }
-                return out;
+                return false;
             };
             void ums::list::forEach(std::function<void(string v)> fun){
                 string cur = "";
@@ -203,7 +204,13 @@ int64_t ums::stoi64(string v){
                 return value;
             };
             int ums::var::gint(){
-                return stoi(value);
+                try{
+                    return int(stoi64(value));
+                }catch(...){
+
+                }
+                return -1;
+                
             };
             bool ums::var::gbool(){
                 return (value=="true");
@@ -372,6 +379,56 @@ int64_t ums::stoi64(string v){
 
 
 
+            //score
+            //int scor = 0;
+            //string name = 0;
+            ums::score::score(){
+                name = "";
+            };
+            ums::score::score(int s,string n){
+                scor = s;
+                name = n;
+            };
+
+
+
+            //class top{
+            //score s[25];
+            ums::top::top(ums::score t){
+                for(int i = 0;i<24;i++){
+                    s[i]=t;
+                }
+            };
+            bool comp(ums::score a,ums::score b){
+                        return a.scor<b.scor;
+            }
+            void ums::top::addS(ums::score w){
+                if(w.scor>s[24].scor){
+                    s[24] = w;
+                    score temp;
+                    for(int i = 23;i>-1;i--){
+                        if(s[i].scor<s[i+1].scor){
+                            temp = s[i];
+                            s[i] = s[i+1];
+                            s[i+1] =  temp;
+                        }
+                    }
+                }
+            };
+            std::string ums::top::out(){
+                string o;
+                for(int i = 0;i<25;i++){
+                    o.append(to_string(i+1));
+                    o+='.';
+                    o.append(s[i].name);
+                    o+=':';
+                    o.append(to_string(s[i].scor));
+                    o.append("\n");
+                }
+                return o;
+            };
+
+
             //db - przechowuje użytkowników
             //string name;
             //map<int64_t,user> data;
@@ -383,35 +440,67 @@ int64_t ums::stoi64(string v){
                 name = n;
                 location = loc;
             };
+            void ums::db::addU(int64_t id,ums::user u){
+                data[id] = u;
+            };
+            void ums::db::addU(std::string usr){
+                string id;
+                bool readingData = false;
+                string dat;
+                char l;
+                for(int i = 0;i<usr.length();i++){
+                    l = usr.at(i);
+                    if(l==':'&&!readingData){
+                        readingData = true;
+                    }else if(readingData){
+                        dat+=l;
+                    }else{
+                        id+=l;
+                    }
+                }
+                int idd = stoi64(id);
+                data[idd] = ums::user(dat);
+            };
+            void ums::db::delU(int64_t id){
+                data.erase(id);
+            };
             // save/load data from files
             // id:{"key":"value","key2":"value2"}
             void ums::db::save(){
                 string loc = location;
                 map<int64_t,user> *m = &data;
                 bool *open = &fopen;
-                thread save([&loc,open,m](){
+                thread save([open,m](string loc){
                     while(*open){};
                     *open = true;
-                    ofstream of;
-                    of.open(loc);
+                    string out;
+                    fstream file;
                     map<int64_t,user>::iterator it;
                     for(it = m->begin();it!=m->end();it++){
-                        of << to_string(it->first) << ":" << it->second.getS() << endl;
+                        out.append(to_string(it->first));
+                        out+=":";
+                        out.append(it->second.getS());
+                        out.append("\n");
                     };
-                    of.close();
+                    file.open(loc,ios::out);
+                    if(!file){cout << "nie można zapisać pliku" << endl;}
+                    else {
+                        file.clear();
+                        file << out;
+                    }
+                    file.close();
                     *open = false;
-                });
+                },loc);
                 save.detach();
             };
             void ums::db::load(){
                     string loc = location;
                     bool *open = &fopen;
                     map<int64_t,user> *m = &data;
-                    thread load([&loc,open,m](){
+                    thread load([open,m](string loc){
                         while(*open){}
-                        ifstream of;
+                        ifstream of(loc);
                         *open = true;
-                        of.open(loc);
                         string decode;
                         while (getline(of,decode))
                         {
@@ -434,22 +523,35 @@ int64_t ums::stoi64(string v){
                         }
                         of.close();
                         *open = false;
-                    });
+                    },loc);
                     load.detach();
             };
             void ums::db::backup(string name){
                 string loc = name;
                 map<int64_t,user> *m = &data;
-                thread save([&loc,m](){
-                    ofstream of;
-                    of.open(loc);
+                thread save([m](string loc){
+                    ofstream of(loc);
                     map<int64_t,user>::iterator it;
                     for(it = m->begin();it!=m->end();it++){
                         of << to_string(it->first) << ":" << it->second.getS() << endl;
                     };
                     of.close();
-                });
+                },loc);
                 save.detach();
+            };
+            void ums::db::log(){
+                map<int64_t,user>::iterator it;
+                for(it = data.begin();it!=data.end();it++){
+                    cout << to_string(it->first) << ":" << it->second.getS() << endl;
+                };
+            };
+            ums::top ums::db::topBy(string name){
+                ums::top out = ums::top(ums::score(0,""));
+                map<int64_t,user>::iterator it;
+                for(it = data.begin();it!=data.end();it++){
+                        out.addS(score(it->second.geti(name),it->second.gets("name")));   
+                };
+                return out;
             };
             //get user pointer
             ums::user * ums::db::get(int64_t id){
