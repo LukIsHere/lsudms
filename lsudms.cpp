@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <sstream>
 using namespace  std;
 //sprawdza czy biblioteka działa poprawnie
 void ums::connect(){
@@ -15,7 +16,7 @@ int64_t ums::stoi64(string v){
     for (int i = 0; v.length() > i; ++i)
     {
         string charr;
-        charr.push_back(v.at(v.length() -1 - i));
+        charr.push_back(v.at(v.length() - 1 - i));
         out = stoi(charr) * te + out;
         te = te*10;
     }
@@ -205,7 +206,7 @@ int64_t ums::stoi64(string v){
             };
             int ums::var::gint(){
                 try{
-                    return int(stoi64(value));
+                    return stoi64(value);
                 }catch(...){
 
                 }
@@ -226,14 +227,6 @@ int64_t ums::stoi64(string v){
                 }
                 catch(const std::exception& e)
                 {
-                    try
-                    {
-                        value = to_string(stoi64(value)+toAdd);
-                    }
-                    catch(const std::exception& e)
-                    {
-                        std::cerr << e.what() << '\n';
-                    }
                 }
             };
             void ums::var::Sappend(string toAppend){
@@ -314,12 +307,15 @@ int64_t ums::stoi64(string v){
             //set values
             void ums::user::set(string name,string val){
                 data[name] = var(val);
+                exist = true;
             };
             void ums::user::set(string name,int val){
                 data[name] = var(val);
+                exist = true;
             };
             void ums::user::set(string name,bool val){
                 data[name] = var(val);
+                exist = true;
             };
             //work with values
             void ums::user::Iadd(string name,int toAdd){
@@ -477,6 +473,7 @@ int64_t ums::stoi64(string v){
                     fstream file;
                     map<int64_t,user>::iterator it;
                     for(it = m->begin();it!=m->end();it++){
+                        
                         out.append(to_string(it->first));
                         out+=":";
                         out.append(it->second.getS());
@@ -517,8 +514,10 @@ int64_t ums::stoi64(string v){
                                 }else{
                                     id+=l;
                                 }
-                            }
-                            int idd = stoi64(id);
+                            }//działa
+                            int64_t idd = stoi64(id);
+                            cout << id << endl;
+                            cout << idd << endl;
                             m->insert(pair<int64_t,user>(idd,user(data)));
                         }
                         of.close();
@@ -533,7 +532,9 @@ int64_t ums::stoi64(string v){
                     ofstream of(loc);
                     map<int64_t,user>::iterator it;
                     for(it = m->begin();it!=m->end();it++){
-                        of << to_string(it->first) << ":" << it->second.getS() << endl;
+                        std::stringstream strr;
+                        strr << it->first;
+                        of <<  strr.str() << ":" << it->second.getS() << endl;
                     };
                     of.close();
                 },loc);
